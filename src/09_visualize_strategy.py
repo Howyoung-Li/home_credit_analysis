@@ -348,6 +348,34 @@ def draw_shap_and_reasons() -> tuple[Path, Path]:
     return shap_path, reason_path
 
 
+def build_project_overview() -> list[tuple[str, str]]:
+    split_summary = pd.read_csv(TABLE_DIR / "feature_screening_split_summary.csv")
+    feature_groups = pd.read_csv(TABLE_DIR / "feature_screening_group_summary.csv")
+    feature_store = pd.read_csv(TABLE_DIR / "feature_store_group_profile.csv")
+    metrics = pd.read_csv(TABLE_DIR / "lgbm_metrics.csv")
+
+    labeled_rows = int(split_summary[split_summary["dataset"] == "train"]["rows"].sum())
+    external_rows = int(split_summary[split_summary["screening_split"] == "external_unlabeled"]["rows"].iloc[0])
+    dev = metrics[metrics["split"] == "development"].iloc[0]
+    val = metrics[metrics["split"] == "validation"].iloc[0]
+    holdout = metrics[metrics["split"] == "final_holdout"].iloc[0]
+    feature_store_count = int(feature_store["feature_count"].sum())
+    candidate_count = int(feature_groups["candidate_count"].sum())
+    shortlist_count = int(feature_groups["final_shortlist_count"].sum())
+
+    return [
+        ("数据来源", "Home Credit Default Risk（Kaggle）多表信贷申请与历史履约数据"),
+        ("样本量", f"有标签 train {labeled_rows:,}；官方无标签 test {external_rows:,}"),
+        ("特征构建", f"申请级特征集市 {feature_store_count:,} 个字段；建模候选 {candidate_count:,} 个特征"),
+        ("特征筛选", f"质量、单变量、PSI 和相关性筛选后保留 {shortlist_count:,} 个入模特征"),
+        ("模型", "Logit baseline + LightGBM GBDT；主模型使用 LightGBM"),
+        (
+            "验证口径",
+            f"development {int(dev['rows']):,} / validation {int(val['rows']):,} / final_holdout {int(holdout['rows']):,}；坏账率 {pct(holdout['bad_rate'], 2)}",
+        ),
+    ]
+
+
 def write_dashboard(figures: list[Path]) -> Path:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     metrics = pd.read_csv(TABLE_DIR / "lgbm_metrics.csv")
@@ -368,6 +396,10 @@ def write_dashboard(figures: list[Path]) -> Path:
     card_html = "\n".join(
         f'<div class="card"><span>{esc(name)}</span><strong>{esc(value)}</strong></div>' for name, value in cards
     )
+    overview_html = "\n".join(
+        f'<div class="overview-item"><span>{esc(name)}</span><strong>{esc(value)}</strong></div>'
+        for name, value in build_project_overview()
+    )
     fig_html = "\n".join(
         f'<section><img src="{esc(path.as_posix())}" alt="{esc(path.stem)}" /></section>' for path in rel_figures
     )
@@ -381,19 +413,27 @@ def write_dashboard(figures: list[Path]) -> Path:
     main {{ max-width: 1180px; margin: 0 auto; padding: 32px 28px 56px; }}
     h1 {{ font-size: 30px; margin: 0 0 8px; }}
     p {{ margin: 0 0 22px; color: #64748b; line-height: 1.6; }}
+    h2 {{ font-size: 18px; margin: 28px 0 12px; }}
+    .overview {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0 26px; }}
+    .overview-item {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; }}
+    .overview-item span {{ display: block; color: #64748b; font-size: 13px; margin-bottom: 7px; }}
+    .overview-item strong {{ font-size: 15px; line-height: 1.5; font-weight: 650; }}
     .cards {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 22px 0 28px; }}
     .card {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 18px; }}
     .card span {{ display: block; color: #64748b; font-size: 13px; margin-bottom: 8px; }}
     .card strong {{ font-size: 24px; }}
     section {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 18px; }}
     img {{ width: 100%; height: auto; display: block; }}
-    @media (max-width: 760px) {{ .cards {{ grid-template-columns: 1fr; }} main {{ padding: 20px 12px 36px; }} }}
+    @media (max-width: 760px) {{ .overview, .cards {{ grid-template-columns: 1fr; }} main {{ padding: 20px 12px 36px; }} }}
   </style>
 </head>
 <body>
 <main>
   <h1>Home Credit A卡风控策略可视化</h1>
-  <p>图表聚焦模型排序、三段准入策略、金额加权成本收益、SHAP解释和原因码，可作为项目报告或面试展示的核心页面。</p>
+  <p>图表聚焦模型排序、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <h2>项目概览</h2>
+  <div class="overview">{overview_html}</div>
+  <h2>核心结果</h2>
   <div class="cards">{card_html}</div>
   {fig_html}
 </main>
