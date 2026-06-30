@@ -1,0 +1,10 @@
+feature_group,feature_count,avg_missing_rate
+current_application,144,0.21164077229325434
+external_credit_history,86,0.1930127459655401
+external_credit_monthly_status,33,0.3441312679077763
+internal_previous_application,83,0.22886283735100404
+internal_repayment_history,60,0.11041767834837408
+internal_credit_card_history,73,0.4784543086441661
+internal_pos_cash_history,55,0.13482390677770395
+history_coverage,6,0.0
+feature_store_quality,2,0.0

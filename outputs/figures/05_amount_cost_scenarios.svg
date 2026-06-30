@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520">
+<rect x="0.0" y="0.0" width="1120.0" height="520.0" rx="0.0" fill="#ffffff" stroke="none" />
+<text x="32.0" y="38.0" font-size="24" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">金额成本场景下的最优阈值</text>
+<text x="32.0" y="66.0" font-size="13" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">不同 LGD / 净利差 / 人审效果假设下，validation 选阈值并在 final_holdout 验证</text>
+<text x="32.0" y="134.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">amount_balanced_base</text>
+<rect x="320.0" y="110.0" width="680.0" height="24.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="320.0" y="110.0" width="272.0" height="24.0" rx="4.0" fill="#dc2626" stroke="none" />
+<rect x="592.0" y="110.0" width="226.7" height="24.0" rx="4.0" fill="#d97706" stroke="none" />
+<text x="826.7" y="128.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">D 12% / M 10%</text>
+<text x="320.0" y="156.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">通过敞口坏账率 4.27% · 坏敞口拦截 49.7% · 每1亿收益 1,217,397</text>
+<text x="32.0" y="200.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">high_lgd_growth</text>
+<rect x="320.0" y="176.0" width="680.0" height="24.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="320.0" y="176.0" width="226.7" height="24.0" rx="4.0" fill="#dc2626" stroke="none" />
+<rect x="546.7" y="176.0" width="340.0" height="24.0" rx="4.0" fill="#d97706" stroke="none" />
+<text x="894.7" y="194.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">D 10% / M 15%</text>
+<text x="320.0" y="222.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">通过敞口坏账率 3.94% · 坏敞口拦截 53.2% · 每1亿收益 2,075,641</text>
+<text x="32.0" y="266.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">high_margin_high_false_decline</text>
+<rect x="320.0" y="242.0" width="680.0" height="24.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="320.0" y="242.0" width="158.7" height="24.0" rx="4.0" fill="#dc2626" stroke="none" />
+<rect x="478.7" y="242.0" width="226.7" height="24.0" rx="4.0" fill="#d97706" stroke="none" />
+<text x="713.3" y="260.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">D 7% / M 10%</text>
+<text x="320.0" y="288.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">通过敞口坏账率 4.99% · 坏敞口拦截 38.2% · 每1亿收益 897,153</text>
+<text x="32.0" y="332.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">low_lgd_low_margin</text>
+<rect x="320.0" y="308.0" width="680.0" height="24.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="320.0" y="308.0" width="226.7" height="24.0" rx="4.0" fill="#dc2626" stroke="none" />
+<rect x="546.7" y="308.0" width="226.7" height="24.0" rx="4.0" fill="#d97706" stroke="none" />
+<text x="781.3" y="326.0" font-size="12" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">D 10% / M 10%</text>
+<text x="320.0" y="354.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">通过敞口坏账率 4.85% · 坏敞口拦截 41.5% · 每1亿收益 760,401</text>
+<text x="860.0" y="445.0" font-size="12" fill="#dc2626" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">红：直接拒绝</text>
+<text x="960.0" y="445.0" font-size="12" fill="#d97706" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">黄：人工审核</text>
+</svg>

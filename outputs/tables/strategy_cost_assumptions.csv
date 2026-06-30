@@ -1,0 +1,5 @@
+cost_scenario,bad_loss_cost,false_decline_good_cost,manual_review_cost,manual_bad_catch_rate,manual_good_false_decline_rate,max_direct_decline_pct,max_manual_review_pct,max_total_intervention_pct,description
+low_bad_loss_low_manual_value,3.0,1.0,0.1,0.35,0.04,0.1,0.1,0.2,坏账损失相对温和，人工审核只拦住少量坏客户。
+balanced_base,5.0,1.0,0.1,0.6,0.06,0.15,0.1,0.25,默认场景：坏客户损失约等于误杀好客户成本的 5 倍，人审能拦住 60% 复核区坏客户，人审产能约 10%。
+high_bad_loss_strong_manual,8.0,1.0,0.1,0.7,0.08,0.2,0.15,0.35,高坏账损失场景，人工审核较有效。
+expensive_manual_conservative_reject,5.0,1.5,0.25,0.5,0.05,0.1,0.1,0.2,人工审核较贵且误杀好客户代价较高，偏保守拒绝。

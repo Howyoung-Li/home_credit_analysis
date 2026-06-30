@@ -1,0 +1,5 @@
+dataset,screening_split,rows,bad_rate
+test,external_unlabeled,48744,
+train,development,184507,0.0807286444416743
+train,final_holdout,61502,0.08072908198107379
+train,validation,61502,0.08072908198107379

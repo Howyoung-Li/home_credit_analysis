@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500">
+<rect x="0.0" y="0.0" width="1120.0" height="500.0" rx="0.0" fill="#ffffff" stroke="none" />
+<text x="32.0" y="38.0" font-size="24" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">风险十分位 Lift</text>
+<text x="32.0" y="66.0" font-size="13" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">final_holdout：按预测风险从高到低分为十组，观察坏账率与累计坏样本捕获</text>
+<line x1="80.0" y1="400.0" x2="1040.0" y2="400.0" stroke="#1f2937" stroke-width="1.2" />
+<line x1="80.0" y1="110.0" x2="80.0" y2="400.0" stroke="#1f2937" stroke-width="1.2" />
+<line x1="80.0" y1="400.0" x2="1040.0" y2="400.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="70.0" y="404.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="end">0%</text>
+<line x1="80.0" y1="327.5" x2="1040.0" y2="327.5" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="70.0" y="331.5" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="end">9%</text>
+<line x1="80.0" y1="255.0" x2="1040.0" y2="255.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="70.0" y="259.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="end">18%</text>
+<line x1="80.0" y1="182.5" x2="1040.0" y2="182.5" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="70.0" y="186.5" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="end">27%</text>
+<line x1="80.0" y1="110.0" x2="1040.0" y2="110.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="70.0" y="114.0" font-size="11" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="end">35%</text>
+<rect x="94.0" y="147.8" width="80.6" height="252.2" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="134.3" y="141.8" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">30.8%</text>
+<text x="134.3" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D1</text>
+<rect x="188.6" y="268.3" width="80.6" height="131.7" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="228.9" y="262.3" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">16.1%</text>
+<text x="228.9" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D2</text>
+<rect x="283.2" y="312.8" width="80.6" height="87.2" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="323.5" y="306.8" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">10.6%</text>
+<text x="323.5" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D3</text>
+<rect x="377.8" y="341.6" width="80.6" height="58.4" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="418.1" y="335.6" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">7.1%</text>
+<text x="418.1" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D4</text>
+<rect x="472.4" y="354.4" width="80.6" height="45.6" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="512.7" y="348.4" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">5.6%</text>
+<text x="512.7" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D5</text>
+<rect x="567.0" y="369.1" width="80.6" height="30.9" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="607.3" y="363.1" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">3.8%</text>
+<text x="607.3" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D6</text>
+<rect x="661.6" y="380.4" width="80.6" height="19.6" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="701.9" y="374.4" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">2.4%</text>
+<text x="701.9" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D7</text>
+<rect x="756.2" y="381.2" width="80.6" height="18.8" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="796.5" y="375.2" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">2.3%</text>
+<text x="796.5" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D8</text>
+<rect x="850.8" y="387.9" width="80.6" height="12.1" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="891.1" y="381.9" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">1.5%</text>
+<text x="891.1" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D9</text>
+<rect x="945.4" y="394.7" width="80.6" height="5.3" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="985.7" y="388.7" font-size="10" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">0.7%</text>
+<text x="985.7" y="426.0" font-size="11" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="middle">D10</text>
+<polyline points="134.3,289.5 228.9,231.8 323.5,193.6 418.1,168.0 512.7,148.0 607.3,134.5 701.9,125.9 796.5,117.7 891.1,112.3 985.7,110.0" fill="none" stroke="#2563eb" stroke-width="3" />
+<circle cx="134.3" cy="289.5" r="4" fill="#2563eb" />
+<circle cx="228.9" cy="231.8" r="4" fill="#2563eb" />
+<circle cx="323.5" cy="193.6" r="4" fill="#2563eb" />
+<circle cx="418.1" cy="168.0" r="4" fill="#2563eb" />
+<circle cx="512.7" cy="148.0" r="4" fill="#2563eb" />
+<circle cx="607.3" cy="134.5" r="4" fill="#2563eb" />
+<circle cx="701.9" cy="125.9" r="4" fill="#2563eb" />
+<circle cx="796.5" cy="117.7" r="4" fill="#2563eb" />
+<circle cx="891.1" cy="112.3" r="4" fill="#2563eb" />
+<circle cx="985.7" cy="110.0" r="4" fill="#2563eb" />
+<text x="840.0" y="96.0" font-size="13" fill="#dc2626" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">红柱：坏账率</text>
+<text x="840.0" y="118.0" font-size="13" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">蓝线：累计坏样本捕获</text>
+</svg>

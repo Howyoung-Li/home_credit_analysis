@@ -1,0 +1,5 @@
+amount_cost_scenario,lgd_rate,net_margin_rate,manual_review_cost_rate_of_median_credit,manual_bad_catch_rate,manual_good_false_decline_rate,max_direct_decline_pct,max_manual_review_pct,max_total_intervention_pct,description
+low_lgd_low_margin,0.35,0.05,0.001,0.35,0.04,0.1,0.1,0.2,较低 LGD 和较低净利差，偏保守的金额加权场景。
+amount_balanced_base,0.5,0.08,0.001,0.6,0.06,0.15,0.1,0.25,默认金额场景：用 AMT_CREDIT 作为 EAD proxy，LGD 50%，净利差 8%，人审产能 10%。
+high_lgd_growth,0.7,0.1,0.001,0.7,0.08,0.2,0.15,0.35,高 LGD 且坏账损失更敏感，允许更高风险干预。
+high_margin_high_false_decline,0.5,0.12,0.002,0.5,0.05,0.1,0.1,0.2,好客户利润更高且人审较贵，误杀成本更重。
