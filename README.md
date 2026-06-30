@@ -96,6 +96,7 @@ python src/09_visualize_strategy.py
 - `outputs/tables/shap_global_importance.csv`
 - `outputs/tables/shap_reason_code_summary.csv`
 - `docs/strategy_profit_shap_initial.md`
+- `docs/interview_data_feature_deep_dive.md`
 - `reports/strategy_visual_dashboard.html`
 - `outputs/figures/01_model_validation_metrics.svg`
 - `outputs/figures/02_strategy_action_profile.svg`
