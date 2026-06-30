@@ -1,5 +1,9 @@
 # Home Credit 贷前信用风险项目
 
+在线 dashboard：https://howyoung-li.github.io/home_credit_analysis/
+
+GitHub 仓库：https://github.com/Howyoung-Li/home_credit_analysis
+
 目标：从 Home Credit 多表原始数据出发，构建一个更接近真实风控工作的项目，而不是只拿现成宽表建模。
 
 本项目可以参考 Kaggle 1st place solution 的多表聚合、特征工程和 LightGBM 思路，但项目主线不是刷榜，而是证明：
