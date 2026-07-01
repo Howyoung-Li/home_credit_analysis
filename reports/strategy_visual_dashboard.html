@@ -17,6 +17,8 @@
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 18px; }
     .card span { display: block; color: #64748b; font-size: 13px; margin-bottom: 8px; }
     .card strong { font-size: 24px; }
+    .links { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 22px; }
+    .links a { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; color: #2563eb; padding: 10px 14px; text-decoration: none; font-weight: 650; }
     section { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
     img { width: 100%; height: auto; display: block; }
     @media (max-width: 760px) { .overview, .cards { grid-template-columns: 1fr; } main { padding: 20px 12px 36px; } }
@@ -25,7 +27,8 @@
 <body>
 <main>
   <h1>Home Credit A卡风控策略可视化</h1>
-  <p>图表聚焦模型排序、TopK审核表现、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <p>图表聚焦模型排序、TopK审核表现、偿债能力/KYC画像、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <div class="links"><a href="./intelligent_risk_agent_demo.html">查看智能风控Agent审核摘要</a></div>
   <h2>项目概览</h2>
   <div class="overview"><div class="overview-item"><span>数据来源</span><strong>Home Credit Default Risk（Kaggle）多表信贷申请与历史履约数据</strong></div>
 <div class="overview-item"><span>样本量</span><strong>有标签 train 307,511；官方无标签 test 48,744</strong></div>
@@ -40,11 +43,13 @@
 <div class="card"><span>Top10 Precision / Recall</span><strong>30.8% / 38.1%</strong></div>
 <div class="card"><span>金额成本最优策略</span><strong>D 12% / M 10%</strong></div>
 <div class="card"><span>通过敞口坏账率</span><strong>4.27%</strong></div>
-<div class="card"><span>每1亿授信收益 proxy</span><strong>1,217,397</strong></div></div>
+<div class="card"><span>每1亿授信收益 proxy</span><strong>1,217,397</strong></div>
+<div class="card"><span>智能风控Agent页面</span><strong>已生成</strong></div></div>
   <section><img src="../outputs/figures/01_model_validation_metrics.svg" alt="01_model_validation_metrics" /></section>
 <section><img src="../outputs/figures/02_strategy_action_profile.svg" alt="02_strategy_action_profile" /></section>
 <section><img src="../outputs/figures/03_lift_decile_curve.svg" alt="03_lift_decile_curve" /></section>
 <section><img src="../outputs/figures/04_topk_precision_recall.svg" alt="04_topk_precision_recall" /></section>
+<section><img src="../outputs/figures/08_repayment_capacity_segments.svg" alt="08_repayment_capacity_segments" /></section>
 <section><img src="../outputs/figures/04_amount_cost_heatmap.svg" alt="04_amount_cost_heatmap" /></section>
 <section><img src="../outputs/figures/05_amount_cost_scenarios.svg" alt="05_amount_cost_scenarios" /></section>
 <section><img src="../outputs/figures/06_shap_top_features.svg" alt="06_shap_top_features" /></section>

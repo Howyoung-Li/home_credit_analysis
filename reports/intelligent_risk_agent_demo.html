@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>智能风控Agent审核摘要</title>
+  <style>
+    body { margin: 0; background: #f8fafc; color: #1f2937; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; }
+    main { max-width: 1120px; margin: 0 auto; padding: 32px 24px 56px; }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 30px 0 12px; font-size: 20px; }
+    h3 { margin: 2px 0 0; font-size: 18px; }
+    p { color: #475569; line-height: 1.7; }
+    a { color: #2563eb; text-decoration: none; }
+    .nav { margin: 16px 0 24px; }
+    .arch { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .arch div, .case-card, .note { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+    .arch span, .mini-grid span, .eyebrow { display: block; color: #64748b; font-size: 13px; margin-bottom: 6px; }
+    .arch strong { font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
+    th { color: #475569; background: #f8fafc; font-weight: 650; }
+    .case-card { margin-bottom: 14px; }
+    .case-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+    .case-head strong { color: #dc2626; white-space: nowrap; }
+    .mini-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .mini-grid div { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
+    .mini-grid b { font-size: 15px; }
+    @media (max-width: 820px) { .arch, .mini-grid { grid-template-columns: 1fr 1fr; } .case-head { display: block; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>大模型辅助贷前准入智能风控组件</h1>
+  <p>本页把A卡评分、偿债能力/KYC画像、SHAP原因码和策略证据组织成可复核的审核摘要。LLM/Agent定位为分析编排层，负责证据检索、结构化总结和人工复核提示，不直接替代可验证的模型评分与准入规则。</p>
+  <div class="nav"><a href="./strategy_visual_dashboard.html">返回主Dashboard</a></div>
+  <section class="arch">
+    <div><span>1. 数据底座</span><strong>多表信贷申请、征信、历史申请与还款数据</strong></div>
+    <div><span>2. 风险排序</span><strong>LightGBM A卡模型 + score band</strong></div>
+    <div><span>3. 策略组件</span><strong>approve / manual review / decline</strong></div>
+    <div><span>4. Agent输出</span><strong>风险画像、证据引用、复核清单</strong></div>
+  </section>
+
+  <h2>偿债能力与KYC画像分层</h2>
+  <table>
+    <thead>
+      <tr><th>策略动作</th><th>样本数</th><th>坏账率</th><th>年金/收入</th><th>外部债务/授信</th><th>信用卡利用率</th><th>历史拒绝率</th><th>2+红灯维度占比</th></tr>
+    </thead>
+    <tbody><tr><td>自动通过</td><td>49,171</td><td>4.2%</td><td>17.9%</td><td>42.1%</td><td>34.9%</td><td>11.7%</td><td>15.3%</td></tr>
+<tr><td>人工复核</td><td>6,146</td><td>16.0%</td><td>18.2%</td><td>56.1%</td><td>66.3%</td><td>17.9%</td><td>42.5%</td></tr>
+<tr><td>直接拒绝</td><td>6,185</td><td>30.7%</td><td>18.9%</td><td>62.8%</td><td>82.4%</td><td>24.9%</td><td>63.7%</td></tr></tbody>
+  </table>
+
+  <h2>Agent审核摘要样例</h2>
+  
+    <article class="case-card">
+      <div class="case-head">
+        <div>
+          <span class="eyebrow">低风险通过样例</span>
+          <h3>自动通过 · SK_ID_CURR 221125</h3>
+        </div>
+        <strong>0.2% PD / 845分</strong>
+      </div>
+      <div class="mini-grid">
+        <div><span>授信金额</span><b>135.0万</b></div>
+        <div><span>收入</span><b>67.5万</b></div>
+        <div><span>年金/收入</span><b>10.0%</b></div>
+        <div><span>授信/收入</span><b>2.00x</b></div>
+        <div><span>偿债风险等级</span><b>低</b></div>
+        <div><span>验证标签</span><b>0</b></div>
+      </div>
+      <p><b>画像与偿债能力：</b>还款压力低：年金/收入 10.0%，授信/收入 2.00x；外部征信负债低：总债务/授信 5.7%，近24月债务/授信 7.4%；信用卡使用低：近6月最高利用率 缺失；历史还款纪律低：近12月逾期占比 缺失，付款覆盖率 缺失</p>
+      <p><b>模型原因码：</b>低风险样例未触发主要高风险原因码；以模型低PD、较高A卡分和画像指标作为自动通过依据。</p>
+      <p><b>Agent审核摘要：</b>建议自动通过；保持额度约束和贷后监控，关注后续征信负债与还款表现变化。</p>
+      <p><b>人工复核清单：</b>常规准入校验即可；保留模型原因码和策略版本，进入贷后表现监控。</p>
+    </article>
+
+
+    <article class="case-card">
+      <div class="case-head">
+        <div>
+          <span class="eyebrow">边界人工复核样例</span>
+          <h3>人工复核 · SK_ID_CURR 100079</h3>
+        </div>
+        <strong>14.6% PD / 512分</strong>
+      </div>
+      <div class="mini-grid">
+        <div><span>授信金额</span><b>27.0万</b></div>
+        <div><span>收入</span><b>22.5万</b></div>
+        <div><span>年金/收入</span><b>6.0%</b></div>
+        <div><span>授信/收入</span><b>1.20x</b></div>
+        <div><span>偿债风险等级</span><b>高</b></div>
+        <div><span>验证标签</span><b>0</b></div>
+      </div>
+      <p><b>画像与偿债能力：</b>历史申请高：历史拒绝率 66.7%，近12月拒绝率 缺失；外部评分中：外部综合评分 0.393；还款压力低：年金/收入 6.0%，授信/收入 1.20x；外部征信负债低：总债务/授信 0.0%，近24月债务/授信 0.0%</p>
+      <p><b>模型原因码：</b>1.外部综合评分/外部数据风险信号(ext_source_mean=0.393)；2.就业稳定性相关风险(employment_years=0.312)；3.模型识别的申请资料风险信号(catfreq__CODE_GENDER=0.341)</p>
+      <p><b>Agent审核摘要：</b>建议进入人工复核；模型分处于边界区间，需要结合偿债能力、征信负债和历史还款纪律确认。</p>
+      <p><b>人工复核清单：</b>补充核验收入稳定性、最近12个月还款覆盖率、信用卡额度使用和历史申请拒绝原因。</p>
+    </article>
+
+
+    <article class="case-card">
+      <div class="case-head">
+        <div>
+          <span class="eyebrow">高风险拒绝样例</span>
+          <h3>直接拒绝 · SK_ID_CURR 262411</h3>
+        </div>
+        <strong>90.7% PD / 220分</strong>
+      </div>
+      <div class="mini-grid">
+        <div><span>授信金额</span><b>54.5万</b></div>
+        <div><span>收入</span><b>11.2万</b></div>
+        <div><span>年金/收入</span><b>22.6%</b></div>
+        <div><span>授信/收入</span><b>4.84x</b></div>
+        <div><span>偿债风险等级</span><b>高</b></div>
+        <div><span>验证标签</span><b>1</b></div>
+      </div>
+      <p><b>画像与偿债能力：</b>历史申请高：历史拒绝率 66.7%，近12月拒绝率 缺失；外部评分高：外部综合评分 0.051；还款压力中：年金/收入 22.6%，授信/收入 4.84x；外部征信负债中：总债务/授信 48.9%，近24月债务/授信 74.8%</p>
+      <p><b>模型原因码：</b>1.外部综合评分/外部数据风险信号(ext_source_mean=0.0511)；2.外部征信历史风险信号(bureau_sum_overdue_amount=7.1e+05)；3.外部征信历史风险信号(bureau_recent_12m_overdue_loan_ratio=1)</p>
+      <p><b>Agent审核摘要：</b>建议直接拒绝；若业务需要保留，可转强验证并要求补充收入、负债与历史征信材料。</p>
+      <p><b>人工复核清单：</b>核验收入真实性、外部负债压力、历史拒绝原因、近期还款异常；复核是否存在资料缺失或异常值。</p>
+    </article>
+
+
+  <div class="note">
+    <p><b>面试口径：</b>Home Credit没有真实流水账单、OCR影像或完整KYC文档，因此本项目不声称做了图像KYC或真实流水解析；这里把KYC定义为申请人画像和偿债能力代理指标。若接入真实业务，可把流水账单解析、KYC影像识别、关系网络和贷后文本记录作为Agent的外部工具与证据源。</p>
+  </div>
+</main>
+</body>
+</html>

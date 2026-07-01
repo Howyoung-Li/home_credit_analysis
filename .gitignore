@@ -22,6 +22,8 @@ outputs/tables/*
 !outputs/tables/lgbm_metrics.csv
 !outputs/tables/lgbm_topk_precision_recall.csv
 !outputs/tables/model_comparison_baseline_lgbm.csv
+!outputs/tables/risk_agent_capacity_segment_summary.csv
+!outputs/tables/risk_agent_case_studies.csv
 !outputs/tables/shap_global_importance.csv
 !outputs/tables/shap_reason_code_summary.csv
 !outputs/tables/strategy_amount_cost_assumptions.csv

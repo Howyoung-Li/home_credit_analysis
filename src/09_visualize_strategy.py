@@ -13,6 +13,39 @@ FIGURE_DIR = PROJECT_ROOT / "outputs" / "figures"
 REPORT_DIR = PROJECT_ROOT / "reports"
 DOCS_DIR = PROJECT_ROOT / "docs"
 
+CAPACITY_COLUMNS = [
+    "SK_ID_CURR",
+    "screening_split",
+    "TARGET",
+    "AMT_INCOME_TOTAL",
+    "AMT_CREDIT",
+    "AMT_ANNUITY",
+    "credit_to_income_ratio",
+    "annuity_to_income_ratio",
+    "income_per_family_member",
+    "employment_years",
+    "bureau_total_debt_to_credit_ratio",
+    "bureau_active_total_debt_to_credit_ratio",
+    "bureau_recent_24m_total_debt_to_credit_ratio",
+    "bureau_sum_debt",
+    "bureau_recent_24m_debt_sum",
+    "credit_card_recent_6m_utilization_max",
+    "credit_card_recent_12m_utilization_max",
+    "installment_recent_12m_late_ratio",
+    "installment_recent_12m_total_payment_ratio",
+    "installment_recent_12m_shortfall_ratio",
+    "previous_refusal_rate",
+    "previous_recent_12m_refusal_rate",
+    "ext_source_mean",
+    "has_bureau_loan_history",
+    "has_installment_record_history",
+    "has_credit_card_month_history",
+    "CNT_CHILDREN",
+    "CNT_FAM_MEMBERS",
+    "DAYS_EMPLOYED",
+    "DAYS_BIRTH",
+]
+
 PALETTE = {
     "ink": "#1f2937",
     "muted": "#6b7280",
@@ -25,6 +58,12 @@ PALETTE = {
     "red": "#dc2626",
     "violet": "#7c3aed",
     "slate": "#475569",
+}
+
+ACTION_LABELS = {
+    "approve": "自动通过",
+    "manual_review": "人工复核",
+    "decline": "直接拒绝",
 }
 
 
@@ -139,6 +178,229 @@ def build_topk_precision_recall(split: str = "final_holdout") -> pd.DataFrame:
     topk_df = pd.DataFrame(rows)
     topk_df.to_csv(TABLE_DIR / "lgbm_topk_precision_recall.csv", index=False)
     return topk_df
+
+
+def level_score(value: float, medium: float, high: float, reverse: bool = False) -> int:
+    if pd.isna(value):
+        return 0
+    if reverse:
+        if value <= high:
+            return 2
+        if value <= medium:
+            return 1
+        return 0
+    if value >= high:
+        return 2
+    if value >= medium:
+        return 1
+    return 0
+
+
+def level_label(score: int) -> str:
+    return ["低", "中", "高"][int(np.clip(score, 0, 2))]
+
+
+def format_ratio_value(value: float, digits: int = 1) -> str:
+    return "缺失" if pd.isna(value) else pct(value, digits)
+
+
+def format_amount(value: float) -> str:
+    if pd.isna(value):
+        return "缺失"
+    if abs(value) >= 10_000:
+        return f"{value / 10_000:,.1f}万"
+    return f"{value:,.0f}"
+
+
+def add_capacity_dimensions(df: pd.DataFrame) -> pd.DataFrame:
+    result = df.copy()
+    result["capacity_repayment_pressure_score"] = [
+        max(level_score(a, 0.25, 0.35), level_score(c, 4.0, 6.0))
+        for a, c in zip(result["annuity_to_income_ratio"], result["credit_to_income_ratio"])
+    ]
+    result["capacity_external_debt_score"] = [
+        max(level_score(a, 0.45, 0.75), level_score(b, 0.45, 0.75), level_score(c, 0.45, 0.75))
+        for a, b, c in zip(
+            result["bureau_total_debt_to_credit_ratio"],
+            result["bureau_active_total_debt_to_credit_ratio"],
+            result["bureau_recent_24m_total_debt_to_credit_ratio"],
+        )
+    ]
+    result["capacity_credit_card_score"] = [
+        max(level_score(a, 0.75, 0.95), level_score(b, 0.75, 0.95))
+        for a, b in zip(result["credit_card_recent_6m_utilization_max"], result["credit_card_recent_12m_utilization_max"])
+    ]
+    result["capacity_repayment_history_score"] = [
+        max(level_score(l, 0.08, 0.18), level_score(p, 0.98, 0.92, reverse=True), level_score(s, 0.08, 0.15))
+        for l, p, s in zip(
+            result["installment_recent_12m_late_ratio"],
+            result["installment_recent_12m_total_payment_ratio"],
+            result["installment_recent_12m_shortfall_ratio"],
+        )
+    ]
+    result["capacity_application_history_score"] = [
+        max(level_score(a, 0.20, 0.50), level_score(b, 0.20, 0.50))
+        for a, b in zip(result["previous_refusal_rate"], result["previous_recent_12m_refusal_rate"])
+    ]
+    result["capacity_external_score_score"] = [level_score(v, 0.50, 0.35, reverse=True) for v in result["ext_source_mean"]]
+    score_cols = [c for c in result.columns if c.startswith("capacity_") and c.endswith("_score")]
+    result["capacity_max_score"] = result[score_cols].max(axis=1)
+    result["capacity_high_dimension_count"] = (result[score_cols] >= 2).sum(axis=1)
+    result["capacity_medium_plus_dimension_count"] = (result[score_cols] >= 1).sum(axis=1)
+    result["capacity_level"] = result["capacity_max_score"].map(level_label)
+    return result
+
+
+def build_risk_dimension_text(row: pd.Series) -> str:
+    dimensions = [
+        (
+            "还款压力",
+            row["capacity_repayment_pressure_score"],
+            f"年金/收入 {format_ratio_value(row['annuity_to_income_ratio'])}，授信/收入 {row['credit_to_income_ratio']:.2f}x"
+            if not pd.isna(row["credit_to_income_ratio"])
+            else f"年金/收入 {format_ratio_value(row['annuity_to_income_ratio'])}，授信/收入 缺失",
+        ),
+        (
+            "外部征信负债",
+            row["capacity_external_debt_score"],
+            f"总债务/授信 {format_ratio_value(row['bureau_total_debt_to_credit_ratio'])}，近24月债务/授信 {format_ratio_value(row['bureau_recent_24m_total_debt_to_credit_ratio'])}",
+        ),
+        (
+            "信用卡使用",
+            row["capacity_credit_card_score"],
+            f"近6月最高利用率 {format_ratio_value(row['credit_card_recent_6m_utilization_max'])}",
+        ),
+        (
+            "历史还款纪律",
+            row["capacity_repayment_history_score"],
+            f"近12月逾期占比 {format_ratio_value(row['installment_recent_12m_late_ratio'])}，付款覆盖率 {format_ratio_value(row['installment_recent_12m_total_payment_ratio'])}",
+        ),
+        (
+            "历史申请",
+            row["capacity_application_history_score"],
+            f"历史拒绝率 {format_ratio_value(row['previous_refusal_rate'])}，近12月拒绝率 {format_ratio_value(row['previous_recent_12m_refusal_rate'])}",
+        ),
+        (
+            "外部评分",
+            row["capacity_external_score_score"],
+            f"外部综合评分 {row['ext_source_mean']:.3f}" if not pd.isna(row["ext_source_mean"]) else "外部综合评分 缺失",
+        ),
+    ]
+    dimensions = sorted(dimensions, key=lambda item: item[1], reverse=True)
+    return "；".join(f"{name}{level_label(score)}：{detail}" for name, score, detail in dimensions[:4])
+
+
+def build_repayment_capacity_outputs() -> tuple[pd.DataFrame, pd.DataFrame]:
+    matrix = pd.read_parquet(PROJECT_ROOT / "data" / "processed" / "candidate_feature_matrix.parquet", columns=CAPACITY_COLUMNS)
+    scored = pd.read_csv(TABLE_DIR / "a_card_scored_population.csv")
+    scored = scored[scored["screening_split"] == "final_holdout"].copy()
+    base = scored.merge(matrix, on=["SK_ID_CURR", "screening_split", "TARGET"], how="left")
+    base = add_capacity_dimensions(base)
+
+    base["bureau_debt_ratio_proxy"] = base[
+        [
+            "bureau_total_debt_to_credit_ratio",
+            "bureau_active_total_debt_to_credit_ratio",
+            "bureau_recent_24m_total_debt_to_credit_ratio",
+        ]
+    ].max(axis=1)
+    base["credit_card_utilization_proxy"] = base[
+        ["credit_card_recent_6m_utilization_max", "credit_card_recent_12m_utilization_max"]
+    ].max(axis=1)
+    base["previous_refusal_proxy"] = base[["previous_refusal_rate", "previous_recent_12m_refusal_rate"]].max(axis=1)
+    base["external_score_risk_proxy"] = 1 - base["ext_source_mean"]
+
+    action_order = ["approve", "manual_review", "decline"]
+    summary_rows = []
+    for action in action_order:
+        part = base[base["strategy_action"] == action]
+        summary_rows.append(
+            {
+                "strategy_action": action,
+                "strategy_action_label": ACTION_LABELS[action],
+                "rows": int(len(part)),
+                "bad_rate": float(part["TARGET"].mean()),
+                "avg_pd": float(part["pd_lgbm"].mean()),
+                "avg_score": float(part["a_card_score"].mean()),
+                "annuity_to_income_mean": float(part["annuity_to_income_ratio"].mean()),
+                "credit_to_income_mean": float(part["credit_to_income_ratio"].mean()),
+                "bureau_debt_ratio_proxy_mean": float(part["bureau_debt_ratio_proxy"].mean()),
+                "credit_card_utilization_proxy_mean": float(part["credit_card_utilization_proxy"].mean()),
+                "installment_recent_12m_late_ratio_mean": float(part["installment_recent_12m_late_ratio"].mean()),
+                "previous_refusal_proxy_mean": float(part["previous_refusal_proxy"].mean()),
+                "external_score_risk_proxy_mean": float(part["external_score_risk_proxy"].mean()),
+                "high_capacity_dimension_share": float((part["capacity_high_dimension_count"] >= 2).mean()),
+                "medium_plus_capacity_dimension_share": float((part["capacity_medium_plus_dimension_count"] >= 1).mean()),
+            }
+        )
+    summary = pd.DataFrame(summary_rows)
+    summary.to_csv(TABLE_DIR / "risk_agent_capacity_segment_summary.csv", index=False)
+
+    case_frames = []
+    for action in action_order:
+        part = base[base["strategy_action"] == action].copy()
+        if action == "decline":
+            chosen = part.sort_values("pd_lgbm", ascending=False).head(1)
+            case_type = "高风险拒绝样例"
+        elif action == "manual_review":
+            median_pd = part["pd_lgbm"].median()
+            chosen = part.iloc[(part["pd_lgbm"] - median_pd).abs().argsort()[:1]]
+            case_type = "边界人工复核样例"
+        else:
+            chosen = part.sort_values("pd_lgbm", ascending=True).head(1)
+            case_type = "低风险通过样例"
+        chosen = chosen.copy()
+        chosen["case_type"] = case_type
+        case_frames.append(chosen)
+    cases = pd.concat(case_frames, ignore_index=True)
+
+    reason_long = pd.read_csv(TABLE_DIR / "shap_reason_code_long.csv")
+    case_rows = []
+    for row in cases.itertuples(index=False):
+        case = pd.Series(row._asdict())
+        reasons = reason_long[reason_long["SK_ID_CURR"] == case["SK_ID_CURR"]].sort_values("reason_rank").head(3)
+        reason_text = "；".join(
+            f"{int(r.reason_rank)}.{r.reason_label}({r.candidate_feature}={r.feature_value:.3g})"
+            for r in reasons.itertuples(index=False)
+        )
+        if not reason_text:
+            reason_text = "低风险样例未触发主要高风险原因码；以模型低PD、较高A卡分和画像指标作为自动通过依据。"
+        risk_dimensions = build_risk_dimension_text(case)
+        action = case["strategy_action"]
+        if action == "decline":
+            recommendation = "建议直接拒绝；若业务需要保留，可转强验证并要求补充收入、负债与历史征信材料。"
+            checklist = "核验收入真实性、外部负债压力、历史拒绝原因、近期还款异常；复核是否存在资料缺失或异常值。"
+        elif action == "manual_review":
+            recommendation = "建议进入人工复核；模型分处于边界区间，需要结合偿债能力、征信负债和历史还款纪律确认。"
+            checklist = "补充核验收入稳定性、最近12个月还款覆盖率、信用卡额度使用和历史申请拒绝原因。"
+        else:
+            recommendation = "建议自动通过；保持额度约束和贷后监控，关注后续征信负债与还款表现变化。"
+            checklist = "常规准入校验即可；保留模型原因码和策略版本，进入贷后表现监控。"
+        case_rows.append(
+            {
+                "case_type": case["case_type"],
+                "SK_ID_CURR": int(case["SK_ID_CURR"]),
+                "strategy_action": action,
+                "strategy_action_label": ACTION_LABELS[action],
+                "pd_lgbm": float(case["pd_lgbm"]),
+                "a_card_score": float(case["a_card_score"]),
+                "target_in_holdout": int(case["TARGET"]),
+                "income": float(case["AMT_INCOME_TOTAL"]),
+                "credit": float(case["AMT_CREDIT"]),
+                "annuity": float(case["AMT_ANNUITY"]),
+                "annuity_to_income_ratio": float(case["annuity_to_income_ratio"]),
+                "credit_to_income_ratio": float(case["credit_to_income_ratio"]),
+                "capacity_level": case["capacity_level"],
+                "capacity_high_dimension_count": int(case["capacity_high_dimension_count"]),
+                "risk_dimensions": risk_dimensions,
+                "top_reasons": reason_text,
+                "agent_recommendation": recommendation,
+                "review_checklist": checklist,
+            }
+        )
+    case_table = pd.DataFrame(case_rows)
+    case_table.to_csv(TABLE_DIR / "risk_agent_case_studies.csv", index=False)
+    return summary, case_table
 
 
 def horizontal_bar_chart(
@@ -396,6 +658,45 @@ def draw_amount_cost_scenarios() -> Path:
     return write_svg("05_amount_cost_scenarios.svg", width, height, body)
 
 
+def draw_repayment_capacity_segments() -> Path:
+    summary, cases = build_repayment_capacity_outputs()
+    write_intelligent_agent_page(summary, cases)
+    write_intelligent_agent_doc()
+
+    metrics = [
+        ("annuity_to_income_mean", "年金/收入", PALETTE["red"]),
+        ("bureau_debt_ratio_proxy_mean", "外部债务/授信", PALETTE["amber"]),
+        ("credit_card_utilization_proxy_mean", "信用卡利用率", PALETTE["cyan"]),
+        ("external_score_risk_proxy_mean", "外部评分风险", PALETTE["blue"]),
+    ]
+    width, height = 1120, 560
+    x0, y0 = 210, 126
+    row_h = 92
+    metric_gap = 150
+    bar_w = 88
+    body = [
+        text(32, 38, "偿债能力与KYC画像分层", 24, PALETTE["ink"]),
+        text(32, 66, "final_holdout：按A卡策略动作对比还款压力、征信负债、信用卡使用、历史拒绝和外部评分风险", 13, PALETTE["muted"]),
+        text(32, 88, "该组件用于辅助人工审核和Agent摘要，不直接替代模型风险排序。", 12, PALETTE["muted"]),
+    ]
+    for i, (_, label, _) in enumerate(metrics):
+        body.append(text(x0 + i * metric_gap, y0 - 20, label, 12, PALETTE["slate"], "middle"))
+    for i, row in enumerate(summary.itertuples(index=False)):
+        y = y0 + i * row_h
+        body.append(line(32, y + 50, width - 48, y + 50, "#f1f5f9", 1))
+        body.append(text(32, y + 2, row.strategy_action_label, 16, PALETTE["ink"]))
+        body.append(text(32, y + 24, f"坏账率 {pct(row.bad_rate,1)} / 均分 {row.avg_score:.0f}", 12, PALETTE["muted"]))
+        for j, (col, _, color) in enumerate(metrics):
+            value = getattr(row, col)
+            value = 0 if pd.isna(value) else float(np.clip(value, 0, 1))
+            x = x0 + j * metric_gap - bar_w / 2
+            body.append(rect(x, y - 8, bar_w, 18, "#f1f5f9", 4))
+            body.append(rect(x, y - 8, bar_w * value, 18, color, 4))
+            body.append(text(x + bar_w / 2, y + 28, pct(value, 1), 12, PALETTE["ink"], "middle"))
+    body.append(text(32, 505, "外部评分风险 = 1 - ext_source_mean；Home Credit无真实流水/OCR，本页将KYC定义为申请画像与偿债能力代理指标。", 12, PALETTE["muted"]))
+    return write_svg("08_repayment_capacity_segments.svg", width, height, body)
+
+
 def draw_shap_and_reasons() -> tuple[Path, Path]:
     shap = pd.read_csv(TABLE_DIR / "shap_global_importance.csv").head(15)
     shap_labels = [f"{r.candidate_feature} | {r.reason_label}" for r in shap.itertuples(index=False)]
@@ -425,6 +726,151 @@ def draw_shap_and_reasons() -> tuple[Path, Path]:
         left=500,
     )
     return shap_path, reason_path
+
+
+def write_intelligent_agent_page(summary: pd.DataFrame, cases: pd.DataFrame) -> Path:
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    summary_rows = "\n".join(
+        "<tr>"
+        f"<td>{esc(row.strategy_action_label)}</td>"
+        f"<td>{row.rows:,}</td>"
+        f"<td>{pct(row.bad_rate, 1)}</td>"
+        f"<td>{pct(row.annuity_to_income_mean, 1)}</td>"
+        f"<td>{pct(row.bureau_debt_ratio_proxy_mean, 1)}</td>"
+        f"<td>{pct(row.credit_card_utilization_proxy_mean, 1)}</td>"
+        f"<td>{pct(row.previous_refusal_proxy_mean, 1)}</td>"
+        f"<td>{pct(row.high_capacity_dimension_share, 1)}</td>"
+        "</tr>"
+        for row in summary.itertuples(index=False)
+    )
+    case_cards = []
+    for row in cases.itertuples(index=False):
+        case_cards.append(
+            f"""
+    <article class="case-card">
+      <div class="case-head">
+        <div>
+          <span class="eyebrow">{esc(row.case_type)}</span>
+          <h3>{esc(row.strategy_action_label)} · SK_ID_CURR {int(row.SK_ID_CURR)}</h3>
+        </div>
+        <strong>{pct(row.pd_lgbm, 1)} PD / {row.a_card_score:.0f}分</strong>
+      </div>
+      <div class="mini-grid">
+        <div><span>授信金额</span><b>{esc(format_amount(row.credit))}</b></div>
+        <div><span>收入</span><b>{esc(format_amount(row.income))}</b></div>
+        <div><span>年金/收入</span><b>{pct(row.annuity_to_income_ratio, 1)}</b></div>
+        <div><span>授信/收入</span><b>{row.credit_to_income_ratio:.2f}x</b></div>
+        <div><span>偿债风险等级</span><b>{esc(row.capacity_level)}</b></div>
+        <div><span>验证标签</span><b>{int(row.target_in_holdout)}</b></div>
+      </div>
+      <p><b>画像与偿债能力：</b>{esc(row.risk_dimensions)}</p>
+      <p><b>模型原因码：</b>{esc(row.top_reasons)}</p>
+      <p><b>Agent审核摘要：</b>{esc(row.agent_recommendation)}</p>
+      <p><b>人工复核清单：</b>{esc(row.review_checklist)}</p>
+    </article>
+"""
+        )
+    case_html = "\n".join(case_cards)
+    html_text = f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>智能风控Agent审核摘要</title>
+  <style>
+    body {{ margin: 0; background: #f8fafc; color: #1f2937; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; }}
+    main {{ max-width: 1120px; margin: 0 auto; padding: 32px 24px 56px; }}
+    h1 {{ margin: 0 0 8px; font-size: 30px; }}
+    h2 {{ margin: 30px 0 12px; font-size: 20px; }}
+    h3 {{ margin: 2px 0 0; font-size: 18px; }}
+    p {{ color: #475569; line-height: 1.7; }}
+    a {{ color: #2563eb; text-decoration: none; }}
+    .nav {{ margin: 16px 0 24px; }}
+    .arch {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }}
+    .arch div, .case-card, .note {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }}
+    .arch span, .mini-grid span, .eyebrow {{ display: block; color: #64748b; font-size: 13px; margin-bottom: 6px; }}
+    .arch strong {{ font-size: 16px; }}
+    table {{ width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }}
+    th, td {{ padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 14px; }}
+    th {{ color: #475569; background: #f8fafc; font-weight: 650; }}
+    .case-card {{ margin-bottom: 14px; }}
+    .case-head {{ display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }}
+    .case-head strong {{ color: #dc2626; white-space: nowrap; }}
+    .mini-grid {{ display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }}
+    .mini-grid div {{ background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }}
+    .mini-grid b {{ font-size: 15px; }}
+    @media (max-width: 820px) {{ .arch, .mini-grid {{ grid-template-columns: 1fr 1fr; }} .case-head {{ display: block; }} }}
+  </style>
+</head>
+<body>
+<main>
+  <h1>大模型辅助贷前准入智能风控组件</h1>
+  <p>本页把A卡评分、偿债能力/KYC画像、SHAP原因码和策略证据组织成可复核的审核摘要。LLM/Agent定位为分析编排层，负责证据检索、结构化总结和人工复核提示，不直接替代可验证的模型评分与准入规则。</p>
+  <div class="nav"><a href="./strategy_visual_dashboard.html">返回主Dashboard</a></div>
+  <section class="arch">
+    <div><span>1. 数据底座</span><strong>多表信贷申请、征信、历史申请与还款数据</strong></div>
+    <div><span>2. 风险排序</span><strong>LightGBM A卡模型 + score band</strong></div>
+    <div><span>3. 策略组件</span><strong>approve / manual review / decline</strong></div>
+    <div><span>4. Agent输出</span><strong>风险画像、证据引用、复核清单</strong></div>
+  </section>
+
+  <h2>偿债能力与KYC画像分层</h2>
+  <table>
+    <thead>
+      <tr><th>策略动作</th><th>样本数</th><th>坏账率</th><th>年金/收入</th><th>外部债务/授信</th><th>信用卡利用率</th><th>历史拒绝率</th><th>2+红灯维度占比</th></tr>
+    </thead>
+    <tbody>{summary_rows}</tbody>
+  </table>
+
+  <h2>Agent审核摘要样例</h2>
+  {case_html}
+
+  <div class="note">
+    <p><b>面试口径：</b>Home Credit没有真实流水账单、OCR影像或完整KYC文档，因此本项目不声称做了图像KYC或真实流水解析；这里把KYC定义为申请人画像和偿债能力代理指标。若接入真实业务，可把流水账单解析、KYC影像识别、关系网络和贷后文本记录作为Agent的外部工具与证据源。</p>
+  </div>
+</main>
+</body>
+</html>
+"""
+    path = REPORT_DIR / "intelligent_risk_agent_demo.html"
+    path.write_text(html_text, encoding="utf-8")
+    return path
+
+
+def write_intelligent_agent_doc() -> Path:
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# 大模型辅助智能风控组件说明",
+        "",
+        "本文件由 `src/09_visualize_strategy.py` 自动生成。",
+        "",
+        "## 定位",
+        "",
+        "项目不把LLM作为直接打分模型，而是把LLM/Agent放在分析编排层：模型负责风险排序，策略阈值负责准入动作，SHAP和变量证据负责解释，Agent负责把这些证据组织成可复核的审核摘要。",
+        "",
+        "## 与度小满风控策略工程师岗位的对应",
+        "",
+        "- 智能化风控组件：A卡模型、准入策略、原因码、审核摘要串成组件化流程。",
+        "- 流水/账单解析：Home Credit无真实流水，本项目用收入、年金、授信、征信债务、信用卡利用率和分期还款表现构造偿债能力代理指标。",
+        "- KYC智能画像：用职业稳定性、家庭负担、资产居住、外部征信、历史申请与履约表现构建申请人画像。",
+        "- 风险排序能力：保留AUC、KS、PR-AUC/AP、TopK坏账率、坏账捕获、Lift作为模型验证指标。",
+        "- 稳定性：保留PSI、score drift和final_holdout只读验证口径。",
+        "- 业务协同：输出approve/manual_review/decline三段策略、人审清单、误杀/漏放成本与金额加权阈值。",
+        "",
+        "## 输出文件",
+        "",
+        "- `reports/intelligent_risk_agent_demo.html`：智能风控Agent审核摘要页面。",
+        "- `outputs/figures/08_repayment_capacity_segments.svg`：偿债能力与KYC画像分层图。",
+        "- `outputs/tables/risk_agent_capacity_segment_summary.csv`：三段策略客群画像指标汇总。",
+        "- `outputs/tables/risk_agent_case_studies.csv`：三类样例的结构化审核摘要。",
+        "",
+        "## 推荐面试话术",
+        "",
+        "我没有让大模型直接判断客户好坏，因为信贷风控需要可验证、可监控、可复盘。我的做法是传统模型负责风险排序，策略模块负责准入阈值，SHAP和变量筛选证据负责解释，大模型Agent负责把客户画像、模型原因码、策略规则和复核清单组织成结构化审核摘要。这样既能利用大模型处理复杂信息和提升审核效率，又不破坏风控模型的可审计性。",
+        "",
+    ]
+    path = DOCS_DIR / "intelligent_risk_agent_demo.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
 
 
 def build_project_overview() -> list[tuple[str, str]]:
@@ -479,6 +925,7 @@ def write_dashboard(figures: list[Path]) -> Path:
         ("金额成本最优策略", f"D {pct(amount_holdout['decline_pct_target_from_validation'],0)} / M {pct(amount_holdout['manual_review_pct_target_from_validation'],0)}"),
         ("通过敞口坏账率", pct(amount_holdout["expected_final_approve_exposure_bad_rate"], 2)),
         ("每1亿授信收益 proxy", num(amount_holdout["incremental_profit_proxy_per_100m_credit"], 0)),
+        ("智能风控Agent页面", "已生成"),
     ]
     rel_figures = [Path("../outputs/figures") / fig.name for fig in figures]
     card_html = "\n".join(
@@ -510,6 +957,8 @@ def write_dashboard(figures: list[Path]) -> Path:
     .card {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 18px; }}
     .card span {{ display: block; color: #64748b; font-size: 13px; margin-bottom: 8px; }}
     .card strong {{ font-size: 24px; }}
+    .links {{ display: flex; gap: 12px; flex-wrap: wrap; margin: 0 0 22px; }}
+    .links a {{ background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; color: #2563eb; padding: 10px 14px; text-decoration: none; font-weight: 650; }}
     section {{ background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 18px; }}
     img {{ width: 100%; height: auto; display: block; }}
     @media (max-width: 760px) {{ .overview, .cards {{ grid-template-columns: 1fr; }} main {{ padding: 20px 12px 36px; }} }}
@@ -518,7 +967,8 @@ def write_dashboard(figures: list[Path]) -> Path:
 <body>
 <main>
   <h1>Home Credit A卡风控策略可视化</h1>
-  <p>图表聚焦模型排序、TopK审核表现、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <p>图表聚焦模型排序、TopK审核表现、偿债能力/KYC画像、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <div class="links"><a href="./intelligent_risk_agent_demo.html">查看智能风控Agent审核摘要</a></div>
   <h2>项目概览</h2>
   <div class="overview">{overview_html}</div>
   <h2>核心结果</h2>
@@ -544,6 +994,7 @@ def write_doc(figures: list[Path], dashboard_path: Path) -> Path:
         "",
         "- 用图表证明模型在 `final_holdout` 上有稳定排序能力。",
         "- 展示不同 TopK 审核比例下的坏账率、坏账捕获率和 Lift。",
+        "- 展示偿债能力与KYC画像分层，并生成智能风控Agent审核摘要页面。",
         "- 把 approve / manual_review / decline 的风险差异展示出来。",
         "- 用金额加权成本热力图解释阈值不是拍脑袋，而是由 LGD、净利差、人审成本和产能共同决定。",
         "- 用 SHAP 和 reason code 把模型风险分数翻译成信贷业务语言。",
@@ -551,6 +1002,7 @@ def write_doc(figures: list[Path], dashboard_path: Path) -> Path:
         "## 输出文件",
         "",
         f"- `{dashboard_path.relative_to(PROJECT_ROOT)}`：HTML dashboard。",
+        "- `reports/intelligent_risk_agent_demo.html`：智能风控Agent审核摘要页面。",
     ]
     for fig in figures:
         lines.append(f"- `{fig.relative_to(PROJECT_ROOT)}`")
@@ -561,9 +1013,10 @@ def write_doc(figures: list[Path], dashboard_path: Path) -> Path:
             "",
             "1. 先看模型指标：final_holdout AUC、KS、PR-AUC/AP。",
             "2. 再看 TopK 审核表现：Top 10% 客群坏账率约 30%，坏账捕获约 38%，说明排序方向和风险浓度正常。",
-            "3. 然后看三段策略：拒绝池和人工审核池坏账率明显高于通过池。",
-            "4. 接着看金额成本热力图：在默认金额场景下选择 12% decline + 10% manual review。",
-            "5. 最后用 SHAP 和原因码解释为什么这些客户被识别为高风险。",
+            "3. 然后看偿债能力与KYC画像分层：说明还款压力、外部债务、信用卡利用和历史拒绝如何辅助人审。",
+            "4. 再看三段策略：拒绝池和人工审核池坏账率明显高于通过池。",
+            "5. 接着看金额成本热力图：在默认金额场景下选择 12% decline + 10% manual review。",
+            "6. 最后用 SHAP、原因码和Agent审核摘要解释为什么这些客户被识别为高风险。",
             "",
         ]
     )
@@ -578,6 +1031,7 @@ def main() -> None:
         draw_strategy_action_profile(),
         draw_lift_curve(),
         draw_topk_precision_recall(),
+        draw_repayment_capacity_segments(),
         draw_amount_cost_heatmap(),
         draw_amount_cost_scenarios(),
     ]

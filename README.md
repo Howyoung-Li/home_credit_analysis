@@ -81,6 +81,8 @@ python src/09_visualize_strategy.py
 - `outputs/tables/lgbm_feature_importance.csv`
 - `outputs/tables/lgbm_topk_precision_recall.csv`
 - `outputs/tables/model_comparison_baseline_lgbm.csv`
+- `outputs/tables/risk_agent_capacity_segment_summary.csv`
+- `outputs/tables/risk_agent_case_studies.csv`
 - `docs/lgbm_model_initial.md`
 - `outputs/tables/a_card_internal_test_metrics.csv`
 - `outputs/tables/a_card_external_test_predictions.csv`
@@ -99,6 +101,7 @@ python src/09_visualize_strategy.py
 - `docs/strategy_profit_shap_initial.md`
 - `docs/interview_data_feature_deep_dive.md`
 - `reports/strategy_visual_dashboard.html`
+- `reports/intelligent_risk_agent_demo.html`
 - `outputs/figures/01_model_validation_metrics.svg`
 - `outputs/figures/02_strategy_action_profile.svg`
 - `outputs/figures/03_lift_decile_curve.svg`
@@ -107,4 +110,6 @@ python src/09_visualize_strategy.py
 - `outputs/figures/05_amount_cost_scenarios.svg`
 - `outputs/figures/06_shap_top_features.svg`
 - `outputs/figures/07_decline_reason_codes.svg`
+- `outputs/figures/08_repayment_capacity_segments.svg`
 - `docs/visualization_initial.md`
+- `docs/intelligent_risk_agent_demo.md`
