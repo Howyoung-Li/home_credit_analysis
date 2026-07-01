@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500">
+<rect x="0.0" y="0.0" width="1120.0" height="500.0" rx="0.0" fill="#ffffff" stroke="none" />
+<text x="32.0" y="38.0" font-size="24" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">TopK审核阈值表现</text>
+<text x="32.0" y="66.0" font-size="13" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">final_holdout：按预测风险从高到低截取不同审核比例，观察风险浓度与坏样本捕获</text>
+<text x="32.0" y="88.0" font-size="12" fill="#6b7280" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Precision 在这里等价于 TopK 客群坏账率；Recall 等价于坏账捕获率。</text>
+<text x="56.0" y="102.0" font-size="13" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">审核TopK</text>
+<text x="171.0" y="102.0" font-size="13" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">样本数</text>
+<text x="276.0" y="102.0" font-size="13" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Lift</text>
+<text x="381.0" y="102.0" font-size="13" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Precision / 坏账率</text>
+<text x="666.0" y="102.0" font-size="13" fill="#475569" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Recall / 坏账捕获</text>
+<line x1="56.0" y1="116.0" x2="1064.0" y2="116.0" stroke="#e5e7eb" stroke-width="1.0" />
+<line x1="56.0" y1="166.0" x2="1064.0" y2="166.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="136.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 1%</text>
+<text x="171.0" y="136.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">616</text>
+<text x="276.0" y="136.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">6.70x</text>
+<rect x="381.0" y="121.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="121.0" width="150.0" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="136.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">54.1%</text>
+<text x="666.0" y="136.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">6.7%</text>
+<line x1="56.0" y1="224.0" x2="1064.0" y2="224.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="194.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 5%</text>
+<text x="171.0" y="194.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">3,076</text>
+<text x="276.0" y="194.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">4.78x</text>
+<rect x="381.0" y="179.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="179.0" width="107.2" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="194.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">38.6%</text>
+<text x="666.0" y="194.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">23.9%</text>
+<line x1="56.0" y1="282.0" x2="1064.0" y2="282.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="252.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 10%</text>
+<text x="171.0" y="252.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">6,151</text>
+<text x="276.0" y="252.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">3.81x</text>
+<rect x="381.0" y="237.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="237.0" width="85.3" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="252.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">30.8%</text>
+<text x="666.0" y="252.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">38.1%</text>
+<line x1="56.0" y1="340.0" x2="1064.0" y2="340.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="310.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 15%</text>
+<text x="171.0" y="310.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">9,226</text>
+<text x="276.0" y="310.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">3.27x</text>
+<rect x="381.0" y="295.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="295.0" width="73.1" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="310.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">26.4%</text>
+<text x="666.0" y="310.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">49.0%</text>
+<line x1="56.0" y1="398.0" x2="1064.0" y2="398.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="368.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 20%</text>
+<text x="171.0" y="368.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">12,301</text>
+<text x="276.0" y="368.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">2.90x</text>
+<rect x="381.0" y="353.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="353.0" width="65.0" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="368.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">23.4%</text>
+<text x="666.0" y="368.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">58.0%</text>
+<line x1="56.0" y1="456.0" x2="1064.0" y2="456.0" stroke="#f1f5f9" stroke-width="1.0" />
+<text x="56.0" y="426.0" font-size="15" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">Top 30%</text>
+<text x="171.0" y="426.0" font-size="14" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">18,451</text>
+<text x="276.0" y="426.0" font-size="14" fill="#16a34a" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">2.37x</text>
+<rect x="381.0" y="411.0" width="150.0" height="18.0" rx="4.0" fill="#f1f5f9" stroke="none" />
+<rect x="381.0" y="411.0" width="53.1" height="18.0" rx="4.0" fill="#dc2626" stroke="none" />
+<text x="545.0" y="426.0" font-size="13" fill="#1f2937" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">19.2%</text>
+<text x="666.0" y="426.0" font-size="14" fill="#2563eb" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" text-anchor="start">71.2%</text>
+</svg>

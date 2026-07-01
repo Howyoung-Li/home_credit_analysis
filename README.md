@@ -79,6 +79,7 @@ python src/09_visualize_strategy.py
 - `outputs/tables/lgbm_metrics.csv`
 - `outputs/tables/lgbm_lift_table.csv`
 - `outputs/tables/lgbm_feature_importance.csv`
+- `outputs/tables/lgbm_topk_precision_recall.csv`
 - `outputs/tables/model_comparison_baseline_lgbm.csv`
 - `docs/lgbm_model_initial.md`
 - `outputs/tables/a_card_internal_test_metrics.csv`
@@ -101,6 +102,7 @@ python src/09_visualize_strategy.py
 - `outputs/figures/01_model_validation_metrics.svg`
 - `outputs/figures/02_strategy_action_profile.svg`
 - `outputs/figures/03_lift_decile_curve.svg`
+- `outputs/figures/04_topk_precision_recall.svg`
 - `outputs/figures/04_amount_cost_heatmap.svg`
 - `outputs/figures/05_amount_cost_scenarios.svg`
 - `outputs/figures/06_shap_top_features.svg`

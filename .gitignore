@@ -20,6 +20,7 @@ outputs/tables/*
 !outputs/tables/lgbm_feature_importance.csv
 !outputs/tables/lgbm_lift_table.csv
 !outputs/tables/lgbm_metrics.csv
+!outputs/tables/lgbm_topk_precision_recall.csv
 !outputs/tables/model_comparison_baseline_lgbm.csv
 !outputs/tables/shap_global_importance.csv
 !outputs/tables/shap_reason_code_summary.csv

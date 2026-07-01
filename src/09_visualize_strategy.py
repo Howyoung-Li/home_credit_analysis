@@ -99,6 +99,48 @@ def color_scale(value: float, vmin: float, vmax: float) -> str:
     return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
 
 
+def average_precision(y_true: np.ndarray, score: np.ndarray) -> float:
+    y_true = np.asarray(y_true, dtype=int)
+    score = np.asarray(score, dtype=float)
+    order = np.argsort(-score, kind="mergesort")
+    y_ranked = y_true[order]
+    positives = y_ranked.sum()
+    if positives == 0:
+        return np.nan
+    tp = np.cumsum(y_ranked)
+    precision_at_k = tp / np.arange(1, len(y_ranked) + 1)
+    return float((precision_at_k * y_ranked).sum() / positives)
+
+
+def build_topk_precision_recall(split: str = "final_holdout") -> pd.DataFrame:
+    predictions = pd.read_csv(TABLE_DIR / "lgbm_predictions.csv")
+    predictions = predictions[predictions["screening_split"] == split].copy()
+    predictions = predictions.sort_values("pred_risk", ascending=False)
+    total_bad = int(predictions["TARGET"].sum())
+    overall_bad_rate = float(predictions["TARGET"].mean())
+    rows = []
+    for topk in [0.01, 0.05, 0.10, 0.15, 0.20, 0.30]:
+        n = int(np.ceil(len(predictions) * topk))
+        selected = predictions.head(n)
+        bad_count = int(selected["TARGET"].sum())
+        bad_rate = float(selected["TARGET"].mean())
+        bad_capture = bad_count / total_bad if total_bad else np.nan
+        rows.append(
+            {
+                "split": split,
+                "topk_pct": topk,
+                "rows": n,
+                "bad_count": bad_count,
+                "bad_rate_precision": bad_rate,
+                "bad_capture_recall": bad_capture,
+                "lift": bad_rate / overall_bad_rate if overall_bad_rate else np.nan,
+            }
+        )
+    topk_df = pd.DataFrame(rows)
+    topk_df.to_csv(TABLE_DIR / "lgbm_topk_precision_recall.csv", index=False)
+    return topk_df
+
+
 def horizontal_bar_chart(
     path_name: str,
     title: str,
@@ -238,6 +280,43 @@ def draw_lift_curve() -> Path:
     body.append(text(840, 96, "红柱：坏账率", 13, PALETTE["red"]))
     body.append(text(840, 118, "蓝线：累计坏样本捕获", 13, PALETTE["blue"]))
     return write_svg("03_lift_decile_curve.svg", width, height, body)
+
+
+def draw_topk_precision_recall() -> Path:
+    df = build_topk_precision_recall("final_holdout")
+    width, height = 1120, 500
+    x0, y0 = 56, 116
+    row_h = 58
+    columns = [
+        ("审核TopK", 0, 110),
+        ("样本数", 115, 110),
+        ("Lift", 220, 70),
+        ("Precision / 坏账率", 325, 220),
+        ("Recall / 坏账捕获", 610, 220),
+    ]
+    max_precision = max(float(df["bad_rate_precision"].max()), 0.01)
+    body = [
+        text(32, 38, "TopK审核阈值表现", 24, PALETTE["ink"]),
+        text(32, 66, "final_holdout：按预测风险从高到低截取不同审核比例，观察风险浓度与坏样本捕获", 13, PALETTE["muted"]),
+        text(32, 88, "Precision 在这里等价于 TopK 客群坏账率；Recall 等价于坏账捕获率。", 12, PALETTE["muted"]),
+    ]
+    for label, x_off, _ in columns:
+        body.append(text(x0 + x_off, y0 - 14, label, 13, PALETTE["slate"]))
+    body.append(line(x0, y0, width - 56, y0, PALETTE["grid"], 1))
+    for i, row in enumerate(df.itertuples(index=False)):
+        y = y0 + 20 + i * row_h
+        body.append(line(x0, y + 30, width - 56, y + 30, "#f1f5f9", 1))
+        body.append(text(x0, y, f"Top {pct(row.topk_pct, 0)}", 15, PALETTE["ink"]))
+        body.append(text(x0 + 115, y, f"{row.rows:,}", 14, PALETTE["ink"]))
+        body.append(text(x0 + 220, y, f"{row.lift:.2f}x", 14, PALETTE["green"]))
+
+        p_bar_w = 150 * row.bad_rate_precision / max_precision
+        body.append(rect(x0 + 325, y - 15, 150, 18, "#f1f5f9", 4))
+        body.append(rect(x0 + 325, y - 15, p_bar_w, 18, PALETTE["red"], 4))
+        body.append(text(x0 + 325 + 164, y, pct(row.bad_rate_precision, 1), 13, PALETTE["ink"]))
+
+        body.append(text(x0 + 610, y, pct(row.bad_capture_recall, 1), 14, PALETTE["blue"]))
+    return write_svg("04_topk_precision_recall.svg", width, height, body)
 
 
 def draw_amount_cost_heatmap() -> Path:
@@ -384,10 +463,19 @@ def write_dashboard(figures: list[Path]) -> Path:
     amount_holdout = amount_opt[
         (amount_opt["amount_cost_scenario"] == "amount_balanced_base") & (amount_opt["split"] == "final_holdout")
     ].iloc[0]
+    predictions = pd.read_csv(TABLE_DIR / "lgbm_predictions.csv")
+    holdout_predictions = predictions[predictions["screening_split"] == "final_holdout"]
+    holdout_ap = average_precision(
+        holdout_predictions["TARGET"].to_numpy(),
+        holdout_predictions["pred_risk"].to_numpy(),
+    )
+    topk = build_topk_precision_recall("final_holdout")
+    top10 = topk[np.isclose(topk["topk_pct"], 0.10)].iloc[0]
     cards = [
         ("final_holdout AUC", f"{holdout['auc']:.4f}"),
         ("KS", f"{holdout['ks']:.4f}"),
-        ("Top 10% 坏账捕获", pct(holdout["top_10pct_bad_capture"], 1)),
+        ("PR-AUC / AP", f"{holdout_ap:.4f}"),
+        ("Top10 Precision / Recall", f"{pct(top10['bad_rate_precision'], 1)} / {pct(top10['bad_capture_recall'], 1)}"),
         ("金额成本最优策略", f"D {pct(amount_holdout['decline_pct_target_from_validation'],0)} / M {pct(amount_holdout['manual_review_pct_target_from_validation'],0)}"),
         ("通过敞口坏账率", pct(amount_holdout["expected_final_approve_exposure_bad_rate"], 2)),
         ("每1亿授信收益 proxy", num(amount_holdout["incremental_profit_proxy_per_100m_credit"], 0)),
@@ -430,7 +518,7 @@ def write_dashboard(figures: list[Path]) -> Path:
 <body>
 <main>
   <h1>Home Credit A卡风控策略可视化</h1>
-  <p>图表聚焦模型排序、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <p>图表聚焦模型排序、TopK审核表现、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
   <h2>项目概览</h2>
   <div class="overview">{overview_html}</div>
   <h2>核心结果</h2>
@@ -455,6 +543,7 @@ def write_doc(figures: list[Path], dashboard_path: Path) -> Path:
         "## 设计目标",
         "",
         "- 用图表证明模型在 `final_holdout` 上有稳定排序能力。",
+        "- 展示不同 TopK 审核比例下的坏账率、坏账捕获率和 Lift。",
         "- 把 approve / manual_review / decline 的风险差异展示出来。",
         "- 用金额加权成本热力图解释阈值不是拍脑袋，而是由 LGD、净利差、人审成本和产能共同决定。",
         "- 用 SHAP 和 reason code 把模型风险分数翻译成信贷业务语言。",
@@ -470,10 +559,11 @@ def write_doc(figures: list[Path], dashboard_path: Path) -> Path:
             "",
             "## 推荐讲述顺序",
             "",
-            "1. 先看模型指标：final_holdout AUC、KS、Top 10% 坏账捕获。",
-            "2. 再看三段策略：拒绝池和人工审核池坏账率明显高于通过池。",
-            "3. 然后看金额成本热力图：在默认金额场景下选择 12% decline + 10% manual review。",
-            "4. 最后用 SHAP 和原因码解释为什么这些客户被识别为高风险。",
+            "1. 先看模型指标：final_holdout AUC、KS、PR-AUC/AP。",
+            "2. 再看 TopK 审核表现：Top 10% 客群坏账率约 30%，坏账捕获约 38%，说明排序方向和风险浓度正常。",
+            "3. 然后看三段策略：拒绝池和人工审核池坏账率明显高于通过池。",
+            "4. 接着看金额成本热力图：在默认金额场景下选择 12% decline + 10% manual review。",
+            "5. 最后用 SHAP 和原因码解释为什么这些客户被识别为高风险。",
             "",
         ]
     )
@@ -487,6 +577,7 @@ def main() -> None:
         draw_metric_cards(),
         draw_strategy_action_profile(),
         draw_lift_curve(),
+        draw_topk_precision_recall(),
         draw_amount_cost_heatmap(),
         draw_amount_cost_scenarios(),
     ]

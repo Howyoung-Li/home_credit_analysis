@@ -25,7 +25,7 @@
 <body>
 <main>
   <h1>Home Credit A卡风控策略可视化</h1>
-  <p>图表聚焦模型排序、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
+  <p>图表聚焦模型排序、TopK审核表现、三段准入策略、金额加权成本收益、SHAP解释和原因码。</p>
   <h2>项目概览</h2>
   <div class="overview"><div class="overview-item"><span>数据来源</span><strong>Home Credit Default Risk（Kaggle）多表信贷申请与历史履约数据</strong></div>
 <div class="overview-item"><span>样本量</span><strong>有标签 train 307,511；官方无标签 test 48,744</strong></div>
@@ -36,13 +36,15 @@
   <h2>核心结果</h2>
   <div class="cards"><div class="card"><span>final_holdout AUC</span><strong>0.7960</strong></div>
 <div class="card"><span>KS</span><strong>0.4494</strong></div>
-<div class="card"><span>Top 10% 坏账捕获</span><strong>38.1%</strong></div>
+<div class="card"><span>PR-AUC / AP</span><strong>0.2913</strong></div>
+<div class="card"><span>Top10 Precision / Recall</span><strong>30.8% / 38.1%</strong></div>
 <div class="card"><span>金额成本最优策略</span><strong>D 12% / M 10%</strong></div>
 <div class="card"><span>通过敞口坏账率</span><strong>4.27%</strong></div>
 <div class="card"><span>每1亿授信收益 proxy</span><strong>1,217,397</strong></div></div>
   <section><img src="../outputs/figures/01_model_validation_metrics.svg" alt="01_model_validation_metrics" /></section>
 <section><img src="../outputs/figures/02_strategy_action_profile.svg" alt="02_strategy_action_profile" /></section>
 <section><img src="../outputs/figures/03_lift_decile_curve.svg" alt="03_lift_decile_curve" /></section>
+<section><img src="../outputs/figures/04_topk_precision_recall.svg" alt="04_topk_precision_recall" /></section>
 <section><img src="../outputs/figures/04_amount_cost_heatmap.svg" alt="04_amount_cost_heatmap" /></section>
 <section><img src="../outputs/figures/05_amount_cost_scenarios.svg" alt="05_amount_cost_scenarios" /></section>
 <section><img src="../outputs/figures/06_shap_top_features.svg" alt="06_shap_top_features" /></section>
